@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Attendance Display</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #f4f7f6; padding-top: 50px; }
+    .card { background: white; padding: 30px; display: inline-block; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    #qrcode { display: flex; justify-content: center; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>ប្រព័ន្ធស្កែនវត្តមានរោងចក្រ</h2>
+    <p>សូមប្រើទូរស័ព្ទដៃស្កែន QR Code ខាងក្រោមដើម្បី Check-in / Out</p>
+    <div id="qrcode"></div>
+    <p style="color: gray; font-size: 12px;">QR Code ផ្លាស់ប្តូររៀងរាល់ ១០ វិនាទីម្តង</p>
+  </div>
+
+  <script>
+    var qrcode = new QRCode(document.getElementById("qrcode"), { width: 250, height: 250 });
+
+    function updateQR() {
+      // បង្កើត Token ដោយបូកបញ្ចូលជាមួយ Time Stamp បច្ចុប្បន្ន
+      var timeStamp = new Date().getTime();
+      var dynamicToken = "FACTORY_LOC_" + timeStamp;
+      qrcode.makeCode(dynamicToken);
+    }
+
+    updateQR();
+    setInterval(updateQR, 10000); // ផ្លាស់ប្តូរ QR ៀងរាល់ ១០ វិនាទី
+  </script>
+</body>
+</html>

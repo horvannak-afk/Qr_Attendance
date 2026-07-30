@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ស្កែនវត្តមាន</title>
+  <!-- HTML5 QR Code Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    #reader { width: 100%; max-width: 400px; margin: auto; }
+    #status { margin-top: 20px; font-weight: bold; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h2>ស្កែន QR Code វត្តមាន</h2>
+  
+  <label for="empId">បញ្ចូលអត្តលេខបុគ្គលិក (ID): </label><br>
+  <input type="text" id="empId" placeholder="ឧទាហរណ៍៖ EMP-001" style="padding: 8px; margin: 10px 0;"><br><br>
+
+  <div id="reader"></div>
+  <div id="status"></div>
+
+  <script>
+    // ⚠️ បិទភ្ជាប់ Web App URL ដែលទទួលបានពីដំណាក់កាលទី ២ ត្រង់នេះ
+    const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL"; 
+
+    function onScanSuccess(decodedText, decodedResult) {
+      const empId = document.getElementById("empId").value;
+      if (!empId) {
+        alert("សូមបញ្ចូលអត្តលេខបុគ្គលិកជាមុនសិន!");
+        return;
+      }
+
+      html5QrcodeScanner.clear(); // បិទកាមេរ៉ាស្កែនបោះអាសន្ន
+      document.getElementById("status").innerText = "កំពុងចាប់យកទីតាំង GPS និងផ្ញើទិន្នន័យ...";
+
+      // ទាញយក GPS ពីទូរស័ព្ទ
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          const payload = {
+            userId: empId,
+            type: "Check-In",
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          };
+
+          // ផ្ញើទិន្នន័យទៅ Google Apps Script
+          fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+          })
+          .then(res => res.json())
+          .then(data => {
+            if(data.success) {
+              document.getElementById("status").style.color = "green";
+            } else {
+              document.getElementById("status").style.color = "red";
+            }
+            document.getElementById("status").innerText = data.message;
+          })
+          .catch(err => {
+            document.getElementById("status").innerText = "មានបញ្ហាផ្ញើទិន្នន័យ៖ " + err;
+          });
+
+        }, function(error) {
+          document.getElementById("status").innerText = "មិនអាចទាញយក GPS បានទេ! សូមបើក Location Permission។";
+        });
+      }
+    }
+
+    let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+    html5QrcodeScanner.render(onScanSuccess);
+  </script>
+</body>
+</html>
